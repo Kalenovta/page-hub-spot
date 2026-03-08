@@ -1,0 +1,28 @@
+export interface LinkItem {
+  id: string;
+  title: string;
+  url: string;
+  icon?: string;
+  enabled: boolean;
+}
+
+export interface ProfileData {
+  name: string;
+  bio: string;
+  avatar: string;
+  links: LinkItem[];
+  slug: string;
+}
+
+export const DEFAULT_PROFILE: ProfileData = {
+  name: "Your Name",
+  bio: "Developer · Creator · Dreamer",
+  avatar: "",
+  slug: "yourname",
+  links: [
+    { id: "1", title: "Portfolio", url: "https://example.com", icon: "Globe", enabled: true },
+    { id: "2", title: "GitHub", url: "https://github.com", icon: "Github", enabled: true },
+    { id: "3", title: "Twitter / X", url: "https://x.com", icon: "Twitter", enabled: true },
+    { id: "4", title: "LinkedIn", url: "https://linkedin.com", icon: "Linkedin", enabled: true },
+  ],
+};
