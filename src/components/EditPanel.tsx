@@ -30,7 +30,7 @@ const EditPanel = ({
     >
       <div className="absolute inset-0 bg-background/60 backdrop-blur-sm" onClick={onClose} />
       <motion.div
-        className="relative w-full max-w-md h-full glass-card border-l border-border overflow-y-auto"
+        className="relative w-full max-w-md h-full bg-card border-l border-border overflow-y-auto shadow-xl"
         initial={{ x: "100%" }}
         animate={{ x: 0 }}
         exit={{ x: "100%" }}

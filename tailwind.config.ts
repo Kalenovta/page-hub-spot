@@ -13,7 +13,7 @@ export default {
       },
     },
     fontFamily: {
-      display: ['Space Grotesk', 'sans-serif'],
+      display: ['Plus Jakarta Sans', 'sans-serif'],
       body: ['Inter', 'sans-serif'],
     },
     extend: {
