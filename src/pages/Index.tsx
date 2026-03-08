@@ -12,7 +12,7 @@ const Index = () => {
   const { profile, updateProfile, addLink, updateLink, removeLink, reorderLinks } = useProfile();
 
   return (
-    <div className="min-h-screen bg-background bg-mesh flex flex-col items-center justify-start pt-16 pb-20 px-4">
+    <div className="min-h-screen bg-background flex flex-col items-center justify-start pt-16 pb-20 px-4">
       {/* Edit Toggle */}
       <motion.div
         className="fixed top-4 right-4 z-40"
