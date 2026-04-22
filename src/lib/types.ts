@@ -14,6 +14,14 @@ export interface ProfileData {
   slug: string;
 }
 
+export interface UserAccount {
+  id: string;
+  email: string;
+  password: string; // stored as plaintext in localStorage (demo only)
+  createdAt: string;
+  profile: ProfileData;
+}
+
 export const DEFAULT_PROFILE: ProfileData = {
   name: "Your Name",
   bio: "Developer · Creator · Dreamer",
