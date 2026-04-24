@@ -6,12 +6,19 @@ export interface LinkItem {
   enabled: boolean;
 }
 
+export interface ProfileTheme {
+  backgroundColor?: string;
+  buttonColor?: string;
+  buttonTextColor?: string;
+}
+
 export interface ProfileData {
   name: string;
   bio: string;
   avatar: string;
   links: LinkItem[];
   slug: string;
+  theme?: ProfileTheme;
 }
 
 export interface UserAccount {

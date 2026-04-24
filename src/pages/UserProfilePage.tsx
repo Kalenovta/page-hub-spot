@@ -57,7 +57,10 @@ const UserProfilePage = () => {
   const activeLinks = profile.links.filter((l) => l.enabled);
 
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-start pt-16 pb-20 px-4">
+    <div 
+      className="min-h-screen flex flex-col items-center justify-start pt-16 pb-20 px-4 transition-colors duration-300"
+      style={{ backgroundColor: profile.theme?.backgroundColor || "hsl(var(--background))" }}
+    >
       {/* Background glow */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute top-1/4 left-1/2 -translate-x-1/2 w-[600px] h-[400px] bg-primary/5 rounded-full blur-3xl" />
@@ -69,7 +72,7 @@ const UserProfilePage = () => {
 
         <div className="space-y-3">
           {activeLinks.map((link, i) => (
-            <LinkCard key={link.id} link={link} index={i} />
+            <LinkCard key={link.id} link={link} index={i} theme={profile.theme} />
           ))}
         </div>
 

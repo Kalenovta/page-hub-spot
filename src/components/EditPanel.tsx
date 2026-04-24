@@ -59,12 +59,43 @@ const EditPanel = ({
               placeholder="Short bio"
               className="bg-secondary border-border"
             />
-            <Input
-              value={profile.avatar}
-              onChange={(e) => onUpdateProfile({ avatar: e.target.value })}
-              placeholder="Avatar URL"
-              className="bg-secondary border-border"
-            />
+            <div>
+              <label className="text-sm text-muted-foreground mb-1 block">Avatar</label>
+              <div className="flex items-center gap-3">
+                {profile.avatar ? (
+                  <img src={profile.avatar} alt="Avatar" className="w-10 h-10 rounded-full object-cover border border-border shrink-0" />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-secondary border border-border flex items-center justify-center shrink-0">
+                    <span className="text-muted-foreground text-xs font-medium">Pic</span>
+                  </div>
+                )}
+                <Input
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => {
+                    const file = e.target.files?.[0];
+                    if (file) {
+                      const reader = new FileReader();
+                      reader.onloadend = () => {
+                        onUpdateProfile({ avatar: reader.result as string });
+                      };
+                      reader.readAsDataURL(file);
+                    }
+                  }}
+                  className="bg-secondary border-border cursor-pointer text-xs h-9 flex-1"
+                />
+                {profile.avatar && (
+                  <Button 
+                    variant="ghost" 
+                    size="icon" 
+                    onClick={() => onUpdateProfile({ avatar: "" })} 
+                    className="h-9 w-9 text-destructive hover:bg-destructive/10 hover:text-destructive shrink-0"
+                  >
+                    <Trash2 className="w-4 h-4" />
+                  </Button>
+                )}
+              </div>
+            </div>
             <div>
               <label className="text-sm text-muted-foreground mb-1 block">Your link slug</label>
               <div className="flex items-center gap-1">
@@ -75,6 +106,49 @@ const EditPanel = ({
                   placeholder="yourname"
                   className="bg-secondary border-border"
                 />
+              </div>
+            </div>
+          </div>
+
+          {/* Appearance Section */}
+          <div className="space-y-4 mb-8">
+            <h3 className="text-sm font-semibold text-muted-foreground uppercase tracking-wider">Appearance</h3>
+            <div className="grid grid-cols-3 gap-4">
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">Background</label>
+                <div className="flex items-center gap-2 bg-secondary border border-border rounded-md p-1">
+                  <Input
+                    type="color"
+                    value={profile.theme?.backgroundColor || "#0a0a0a"}
+                    onChange={(e) => onUpdateProfile({ theme: { ...profile.theme, backgroundColor: e.target.value } })}
+                    className="w-8 h-8 p-0 border-0 rounded overflow-hidden cursor-pointer shrink-0"
+                  />
+                  <span className="text-xs text-muted-foreground uppercase font-mono">{profile.theme?.backgroundColor || "#0a0a0a"}</span>
+                </div>
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">Button Color</label>
+                <div className="flex items-center gap-2 bg-secondary border border-border rounded-md p-1">
+                  <Input
+                    type="color"
+                    value={profile.theme?.buttonColor || "#ffffff"}
+                    onChange={(e) => onUpdateProfile({ theme: { ...profile.theme, buttonColor: e.target.value } })}
+                    className="w-8 h-8 p-0 border-0 rounded overflow-hidden cursor-pointer shrink-0"
+                  />
+                  <span className="text-xs text-muted-foreground uppercase font-mono">{profile.theme?.buttonColor || "#ffffff"}</span>
+                </div>
+              </div>
+              <div>
+                <label className="text-xs text-muted-foreground mb-1 block">Text Color</label>
+                <div className="flex items-center gap-2 bg-secondary border border-border rounded-md p-1">
+                  <Input
+                    type="color"
+                    value={profile.theme?.buttonTextColor || "#000000"}
+                    onChange={(e) => onUpdateProfile({ theme: { ...profile.theme, buttonTextColor: e.target.value } })}
+                    className="w-8 h-8 p-0 border-0 rounded overflow-hidden cursor-pointer shrink-0"
+                  />
+                  <span className="text-xs text-muted-foreground uppercase font-mono">{profile.theme?.buttonTextColor || "#000000"}</span>
+                </div>
               </div>
             </div>
           </div>
