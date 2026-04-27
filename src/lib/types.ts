@@ -4,6 +4,7 @@ export interface LinkItem {
   url: string;
   icon?: string;
   enabled: boolean;
+  animation?: "none" | "wobble" | "bounce" | "blink";
 }
 
 export interface ProfileTheme {

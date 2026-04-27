@@ -1,5 +1,5 @@
-import { X, Plus, Trash2, GripVertical, ArrowUp, ArrowDown } from "lucide-react";
-import { motion, AnimatePresence } from "framer-motion";
+import { X, Plus, Trash2, GripVertical } from "lucide-react";
+import { motion, Reorder } from "framer-motion";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
@@ -162,38 +162,22 @@ const EditPanel = ({
               </Button>
             </div>
 
-            <AnimatePresence>
-              {profile.links.map((link, index) => (
-                <motion.div
+            <Reorder.Group axis="y" values={profile.links} onReorder={(newLinks) => onUpdateProfile({ links: newLinks })} className="space-y-3">
+              {profile.links.map((link) => (
+                <Reorder.Item
                   key={link.id}
-                  className="glass-card rounded-lg p-3 space-y-2"
-                  initial={{ opacity: 0, height: 0 }}
-                  animate={{ opacity: 1, height: "auto" }}
-                  exit={{ opacity: 0, height: 0 }}
-                  layout
+                  value={link}
+                  className="glass-card rounded-lg p-3 space-y-2 relative"
                 >
                   <div className="flex items-center gap-2">
-                    <div className="flex flex-col">
-                      <button
-                        onClick={() => index > 0 && onReorderLinks(index, index - 1)}
-                        className="text-muted-foreground hover:text-foreground disabled:opacity-30"
-                        disabled={index === 0}
-                      >
-                        <ArrowUp className="w-3 h-3" />
-                      </button>
-                      <button
-                        onClick={() => index < profile.links.length - 1 && onReorderLinks(index, index + 1)}
-                        className="text-muted-foreground hover:text-foreground disabled:opacity-30"
-                        disabled={index === profile.links.length - 1}
-                      >
-                        <ArrowDown className="w-3 h-3" />
-                      </button>
+                    <div className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground p-1">
+                      <GripVertical className="w-4 h-4" />
                     </div>
                     <Input
                       value={link.title}
                       onChange={(e) => onUpdateLink(link.id, { title: e.target.value })}
                       placeholder="Title"
-                      className="bg-muted border-border text-sm"
+                      className="bg-muted border-border text-sm flex-1"
                     />
                     <Switch
                       checked={link.enabled}
@@ -203,25 +187,40 @@ const EditPanel = ({
                       <Trash2 className="w-4 h-4" />
                     </Button>
                   </div>
-                  <Input
-                    value={link.url}
-                    onChange={(e) => onUpdateLink(link.id, { url: e.target.value })}
-                    placeholder="https://..."
-                    className="bg-muted border-border text-sm"
-                  />
-                  <Select value={link.icon} onValueChange={(val) => onUpdateLink(link.id, { icon: val })}>
-                    <SelectTrigger className="bg-muted border-border text-sm">
-                      <SelectValue placeholder="Icon" />
-                    </SelectTrigger>
-                    <SelectContent>
-                      {ICONS.map((icon) => (
-                        <SelectItem key={icon} value={icon}>{icon}</SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                </motion.div>
+                  <div className="pl-7">
+                    <Input
+                      value={link.url}
+                      onChange={(e) => onUpdateLink(link.id, { url: e.target.value })}
+                      placeholder="https://..."
+                      className="bg-muted border-border text-sm mb-2"
+                    />
+                    <div className="grid grid-cols-2 gap-2">
+                      <Select value={link.icon} onValueChange={(val) => onUpdateLink(link.id, { icon: val })}>
+                        <SelectTrigger className="bg-muted border-border text-sm">
+                          <SelectValue placeholder="Icon" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {ICONS.map((icon) => (
+                            <SelectItem key={icon} value={icon}>{icon}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Select value={link.animation || "none"} onValueChange={(val: any) => onUpdateLink(link.id, { animation: val })}>
+                        <SelectTrigger className="bg-muted border-border text-sm">
+                          <SelectValue placeholder="Animation" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          <SelectItem value="none">None</SelectItem>
+                          <SelectItem value="wobble">Wobble</SelectItem>
+                          <SelectItem value="bounce">Bounce</SelectItem>
+                          <SelectItem value="blink">Blink</SelectItem>
+                        </SelectContent>
+                      </Select>
+                    </div>
+                  </div>
+                </Reorder.Item>
               ))}
-            </AnimatePresence>
+            </Reorder.Group>
           </div>
         </div>
       </motion.div>
