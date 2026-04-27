@@ -1,11 +1,15 @@
 import { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import { motion } from "framer-motion";
-import { Sparkles } from "lucide-react";
+import { Sparkles, Globe, Github, Twitter, Linkedin, Link as LinkIcon, Youtube, Instagram, Mail, ExternalLink } from "lucide-react";
 import { getUserBySlug } from "@/lib/auth";
 import { UserAccount } from "@/lib/types";
 import ProfileHeader from "@/components/ProfileHeader";
 import LinkCard from "@/components/LinkCard";
+
+const ICON_MAP: Record<string, React.ElementType> = {
+  Globe, Github, Twitter, Linkedin, Link: LinkIcon, Youtube, Instagram, Mail
+};
 
 const UserProfilePage = () => {
   const { slug } = useParams<{ slug: string }>();
@@ -69,6 +73,23 @@ const UserProfilePage = () => {
 
       <div className="relative w-full max-w-md">
         <ProfileHeader name={profile.name} bio={profile.bio} avatar={profile.avatar} />
+
+        {/* Social Icons */}
+        {profile.socialLinks && profile.socialLinks.filter(l => l.enabled).length > 0 && (
+          <div className="flex items-center justify-center flex-wrap gap-4 mt-2 mb-8">
+            {profile.socialLinks.filter(l => l.enabled).map(link => {
+              const IconComp = ICON_MAP[link.icon] || ExternalLink;
+              return (
+                <a key={link.id} href={link.url} target="_blank" rel="noreferrer" 
+                  className="text-foreground hover:opacity-70 transition-opacity"
+                  style={{ color: profile.theme?.buttonTextColor || "inherit" }}
+                >
+                  <IconComp className="w-6 h-6" />
+                </a>
+              )
+            })}
+          </div>
+        )}
 
         <div className="space-y-3">
           {activeLinks.map((link, i) => (

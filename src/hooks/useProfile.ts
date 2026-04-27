@@ -6,7 +6,8 @@ const STORAGE_KEY = "linktree-profile";
 export function useProfile() {
   const [profile, setProfile] = useState<ProfileData>(() => {
     const saved = localStorage.getItem(STORAGE_KEY);
-    return saved ? JSON.parse(saved) : DEFAULT_PROFILE;
+    const parsed = saved ? JSON.parse(saved) : DEFAULT_PROFILE;
+    return { ...DEFAULT_PROFILE, ...parsed, socialLinks: parsed.socialLinks || [] };
   });
 
   useEffect(() => {

@@ -5,8 +5,10 @@ import { useAuth } from "@/contexts/AuthContext";
 
 export function useUserProfile() {
   const { currentUser, refreshUser } = useAuth();
-  const [profile, setProfile] = useState<ProfileData>(() => currentUser?.profile ?? {
-    name: "", bio: "", avatar: "", slug: "", links: [],
+  const [profile, setProfile] = useState<ProfileData>(() => {
+    const defaultData = { name: "", bio: "", avatar: "", slug: "", links: [], socialLinks: [] };
+    if (!currentUser?.profile) return defaultData;
+    return { ...defaultData, ...currentUser.profile, socialLinks: currentUser.profile.socialLinks || [] };
   });
 
   const save = useCallback((updated: ProfileData) => {

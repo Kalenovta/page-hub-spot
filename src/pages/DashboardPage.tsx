@@ -1,29 +1,35 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router-dom";
-import { AnimatePresence, motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import { Reorder } from "framer-motion";
 import {
   ExternalLink,
-  Settings,
-  Eye,
   Copy,
   Check,
+  Plus,
+  Trash2,
+  GripVertical,
+  Globe, Github, Twitter, Linkedin, Link as LinkIcon, Youtube, Instagram, Mail
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Switch } from "@/components/ui/switch";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import ProfileHeader from "@/components/ProfileHeader";
 import LinkCard from "@/components/LinkCard";
-import EditPanel from "@/components/EditPanel";
 import { useAuth } from "@/contexts/AuthContext";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { AdminSidebar } from "@/components/AdminSidebar";
 
-const DashboardPage = () => {
-  const navigate = useNavigate();
-  const { currentUser, logout } = useAuth();
-  const { profile, updateProfile, addLink, updateLink, removeLink, reorderLinks } =
-    useUserProfile();
+const ICONS = ["Globe", "Github", "Twitter", "Linkedin", "Link", "Youtube", "Instagram", "Mail"];
+const ICON_MAP: Record<string, React.ElementType> = {
+  Globe, Github, Twitter, Linkedin, Link: LinkIcon, Youtube, Instagram, Mail
+};
 
-  const [editing, setEditing] = useState(false);
+const DashboardPage = () => {
+  const { currentUser } = useAuth();
+  const { profile, updateProfile, addLink, updateLink, removeLink } = useUserProfile();
+
   const [copied, setCopied] = useState(false);
 
   if (!currentUser) return null;
@@ -36,144 +42,342 @@ const DashboardPage = () => {
     setTimeout(() => setCopied(false), 2000);
   };
 
+  const addSocialLink = () => {
+    const newSocial = {
+      id: Date.now().toString(),
+      url: "https://",
+      icon: "Instagram",
+      enabled: true,
+    };
+    updateProfile({ socialLinks: [...(profile.socialLinks || []), newSocial] });
+  };
+
+  const updateSocialLink = (id: string, updates: any) => {
+    updateProfile({
+      socialLinks: (profile.socialLinks || []).map(l => l.id === id ? { ...l, ...updates } : l)
+    });
+  };
+
+  const removeSocialLink = (id: string) => {
+    updateProfile({
+      socialLinks: (profile.socialLinks || []).filter(l => l.id !== id)
+    });
+  };
+
   return (
     <SidebarProvider>
-      <AdminSidebar onEditClick={() => setEditing(true)} pageUrl={pageUrl} />
+      <AdminSidebar pageUrl={pageUrl} />
       
-      <SidebarInset 
-        className="min-h-screen relative overflow-hidden transition-colors duration-300"
-        style={{ backgroundColor: profile.theme?.backgroundColor || "hsl(var(--background))" }}
-      >
-        {/* Top nav bar */}
-        <header className="border-b border-border bg-card/60 backdrop-blur-sm sticky top-0 z-30">
-          <div className="max-w-3xl mx-auto px-4 h-14 flex items-center justify-between w-full">
-            <div className="flex items-center gap-2">
-              <SidebarTrigger className="-ml-2" />
-              <span className="text-base font-bold font-display text-foreground sm:hidden">PageHub</span>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <Button
-                variant="outline"
-                size="sm"
-                className="gap-1.5 text-xs h-8"
-                onClick={handleCopy}
-              >
-                {copied ? (
-                  <>
-                    <Check className="w-3.5 h-3.5 text-green-400" />
-                    <span className="hidden sm:inline">Copied!</span>
-                  </>
-                ) : (
-                  <>
-                    <Copy className="w-3.5 h-3.5" />
-                    <span className="hidden sm:inline">Copy link</span>
-                  </>
-                )}
-              </Button>
-
-              <Button
-                variant="outline"
-                size="sm"
-                asChild
-                className="gap-1.5 text-xs h-8"
-              >
-                <Link to={`/${profile.slug}`} target="_blank">
-                  <Eye className="w-3.5 h-3.5" />
-                  <span className="hidden sm:inline">Preview</span>
-                </Link>
-              </Button>
-
-              <Button
-                size="sm"
-                className="gap-1.5 text-xs h-8"
-                onClick={() => setEditing(true)}
-              >
-                <Settings className="w-3.5 h-3.5" />
-                <span className="hidden sm:inline">Edit page</span>
-              </Button>
-            </div>
+      <SidebarInset className="min-h-screen bg-[#F3F3F1] flex flex-col">
+        {/* Top bar for mobile trigger */}
+        <div className="lg:hidden p-4 border-b border-border bg-white flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <SidebarTrigger className="-ml-2" />
+            <span className="text-base font-bold font-display text-foreground">PageHub</span>
           </div>
-        </header>
+        </div>
 
-        {/* Main content */}
-        <main className="max-w-3xl mx-auto px-4 py-10 w-full">
-          {/* Info banner */}
-          <motion.div
-            className="mb-8 bg-primary/5 border border-primary/20 rounded-xl px-4 py-3 flex flex-col sm:flex-row sm:items-center justify-between gap-2"
-            initial={{ opacity: 0, y: -8 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.1 }}
-          >
-            <div>
-              <p className="text-xs text-muted-foreground">Your public page URL</p>
-              <a
-                href={pageUrl}
-                target="_blank"
-                rel="noreferrer"
-                className="text-sm font-medium text-primary flex items-center gap-1 hover:underline break-all"
-              >
-                {pageUrl}
-                <ExternalLink className="w-3 h-3 flex-shrink-0" />
-              </a>
+        <div className="flex-1 grid grid-cols-1 lg:grid-cols-[1fr_400px] items-start">
+          
+          {/* LEFT COLUMN: Editor Panel */}
+          <div className="p-4 sm:p-8 max-w-3xl mx-auto w-full">
+            <div className="mb-8">
+              <h2 className="text-2xl font-display font-bold text-foreground">Profile</h2>
+              <p className="text-muted-foreground text-sm">Update your public profile details.</p>
             </div>
-            <span className="text-xs text-muted-foreground bg-muted rounded-md px-2 py-1 self-start sm:self-center truncate max-w-[200px]">
-              {currentUser.email}
-            </span>
-          </motion.div>
 
-          {/* Profile preview */}
-          <motion.div
-            className="bg-card border border-border rounded-2xl p-8 shadow-xl shadow-black/10"
-            initial={{ opacity: 0, y: 16 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.15 }}
-          >
-            <div className="flex flex-col items-center">
-              <ProfileHeader name={profile.name} bio={profile.bio} avatar={profile.avatar} />
-              <div className="w-full max-w-md space-y-3">
-                {profile.links.filter((l) => l.enabled).length === 0 ? (
-                  <p className="text-center text-muted-foreground/60 text-sm py-6">
-                    No links yet — click <strong>Edit page</strong> to add some.
-                  </p>
-                ) : (
-                  profile.links
-                    .filter((l) => l.enabled)
-                    .map((link, i) => (
-                      <LinkCard key={link.id} link={link} index={i} theme={profile.theme} />
-                    ))
-                )}
+            {/* Profile Form */}
+            <div className="bg-white rounded-2xl p-6 shadow-sm border border-border mb-8 space-y-4">
+              <Input
+                value={profile.name}
+                onChange={(e) => updateProfile({ name: e.target.value })}
+                placeholder="Your name"
+                className="bg-muted border-border"
+              />
+              <Input
+                value={profile.bio}
+                onChange={(e) => updateProfile({ bio: e.target.value })}
+                placeholder="Short bio"
+                className="bg-muted border-border"
+              />
+              <div>
+                <label className="text-sm text-muted-foreground mb-1 block">Avatar</label>
+                <div className="flex items-center gap-3">
+                  {profile.avatar ? (
+                    <img src={profile.avatar} alt="Avatar" className="w-10 h-10 rounded-full object-cover border border-border shrink-0" />
+                  ) : (
+                    <div className="w-10 h-10 rounded-full bg-secondary border border-border flex items-center justify-center shrink-0">
+                      <span className="text-muted-foreground text-xs font-medium">Pic</span>
+                    </div>
+                  )}
+                  <Input
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => {
+                      const file = e.target.files?.[0];
+                      if (file) {
+                        const reader = new FileReader();
+                        reader.onloadend = () => {
+                          updateProfile({ avatar: reader.result as string });
+                        };
+                        reader.readAsDataURL(file);
+                      }
+                    }}
+                    className="bg-muted border-border cursor-pointer text-xs h-9 flex-1"
+                  />
+                  {profile.avatar && (
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      onClick={() => updateProfile({ avatar: "" })} 
+                      className="h-9 w-9 text-destructive hover:bg-destructive/10 hover:text-destructive shrink-0"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </Button>
+                  )}
+                </div>
+              </div>
+              <div>
+                <label className="text-sm text-muted-foreground mb-1 block">Your link slug</label>
+                <div className="flex items-center gap-1">
+                  <span className="text-sm text-muted-foreground">/</span>
+                  <Input
+                    value={profile.slug}
+                    onChange={(e) => updateProfile({ slug: e.target.value.replace(/[^a-zA-Z0-9-_]/g, "") })}
+                    placeholder="yourname"
+                    className="bg-muted border-border"
+                  />
+                </div>
               </div>
             </div>
 
-            {/* Quick-edit fab */}
-            <div className="flex justify-center mt-8">
+            {/* Appearance Section */}
+            <div className="mb-8">
+              <h2 className="text-xl font-display font-bold text-foreground mb-4">Appearance</h2>
+              <div className="bg-white rounded-2xl p-6 shadow-sm border border-border grid grid-cols-3 gap-4">
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1 block">Background</label>
+                  <div className="flex items-center gap-2 bg-muted border border-border rounded-md p-1">
+                    <Input
+                      type="color"
+                      value={profile.theme?.backgroundColor || "#0a0a0a"}
+                      onChange={(e) => updateProfile({ theme: { ...profile.theme, backgroundColor: e.target.value } })}
+                      className="w-8 h-8 p-0 border-0 rounded overflow-hidden cursor-pointer shrink-0"
+                    />
+                    <span className="text-xs text-muted-foreground uppercase font-mono hidden sm:inline">{profile.theme?.backgroundColor || "#0a0a0a"}</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1 block">Button</label>
+                  <div className="flex items-center gap-2 bg-muted border border-border rounded-md p-1">
+                    <Input
+                      type="color"
+                      value={profile.theme?.buttonColor || "#ffffff"}
+                      onChange={(e) => updateProfile({ theme: { ...profile.theme, buttonColor: e.target.value } })}
+                      className="w-8 h-8 p-0 border-0 rounded overflow-hidden cursor-pointer shrink-0"
+                    />
+                    <span className="text-xs text-muted-foreground uppercase font-mono hidden sm:inline">{profile.theme?.buttonColor || "#ffffff"}</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1 block">Text</label>
+                  <div className="flex items-center gap-2 bg-muted border border-border rounded-md p-1">
+                    <Input
+                      type="color"
+                      value={profile.theme?.buttonTextColor || "#000000"}
+                      onChange={(e) => updateProfile({ theme: { ...profile.theme, buttonTextColor: e.target.value } })}
+                      className="w-8 h-8 p-0 border-0 rounded overflow-hidden cursor-pointer shrink-0"
+                    />
+                    <span className="text-xs text-muted-foreground uppercase font-mono hidden sm:inline">{profile.theme?.buttonTextColor || "#000000"}</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Social Icons Section */}
+            <div className="mb-8">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-display font-bold text-foreground">Social Icons</h2>
+                <Button variant="secondary" size="sm" onClick={addSocialLink} className="gap-1 rounded-full px-4 font-semibold">
+                  <Plus className="w-4 h-4" /> Add Social Icon
+                </Button>
+              </div>
+              <Reorder.Group axis="y" values={profile.socialLinks || []} onReorder={(newLinks) => updateProfile({ socialLinks: newLinks })} className="space-y-3">
+                {(profile.socialLinks || []).map((link) => (
+                  <Reorder.Item key={link.id} value={link} className="bg-white rounded-2xl p-4 shadow-sm border border-border relative">
+                    <div className="flex items-center gap-2">
+                      <div className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground p-1">
+                        <GripVertical className="w-4 h-4" />
+                      </div>
+                      <Select value={link.icon} onValueChange={(val) => updateSocialLink(link.id, { icon: val })}>
+                        <SelectTrigger className="w-32 bg-muted border-border text-sm">
+                          <SelectValue placeholder="Icon" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {ICONS.map((icon) => (
+                            <SelectItem key={icon} value={icon}>{icon}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                      <Input
+                        value={link.url}
+                        onChange={(e) => updateSocialLink(link.id, { url: e.target.value })}
+                        placeholder="https://..."
+                        className="bg-muted border-border text-sm flex-1"
+                      />
+                      <Switch
+                        checked={link.enabled}
+                        onCheckedChange={(checked) => updateSocialLink(link.id, { enabled: checked })}
+                      />
+                      <Button variant="ghost" size="icon" onClick={() => removeSocialLink(link.id)} className="text-destructive hover:text-destructive shrink-0">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                  </Reorder.Item>
+                ))}
+              </Reorder.Group>
+            </div>
+
+            {/* Main Links Section */}
+            <div className="mb-20">
+              <div className="flex items-center justify-between mb-4">
+                <h2 className="text-xl font-display font-bold text-foreground">Links</h2>
+                <Button variant="default" size="sm" onClick={addLink} className="gap-1 rounded-full px-4 font-semibold">
+                  <Plus className="w-4 h-4" /> Add Link
+                </Button>
+              </div>
+
+              <Reorder.Group axis="y" values={profile.links} onReorder={(newLinks) => updateProfile({ links: newLinks })} className="space-y-3">
+                {profile.links.map((link) => (
+                  <Reorder.Item
+                    key={link.id}
+                    value={link}
+                    className="bg-white rounded-2xl p-4 shadow-sm border border-border relative"
+                  >
+                    <div className="flex items-center gap-2">
+                      <div className="cursor-grab active:cursor-grabbing text-muted-foreground hover:text-foreground p-1">
+                        <GripVertical className="w-4 h-4" />
+                      </div>
+                      <Input
+                        value={link.title}
+                        onChange={(e) => updateLink(link.id, { title: e.target.value })}
+                        placeholder="Title"
+                        className="bg-muted border-border text-sm flex-1"
+                        style={{ fontWeight: 600 }}
+                      />
+                      <Switch
+                        checked={link.enabled}
+                        onCheckedChange={(checked) => updateLink(link.id, { enabled: checked })}
+                      />
+                      <Button variant="ghost" size="icon" onClick={() => removeLink(link.id)} className="text-destructive hover:text-destructive shrink-0">
+                        <Trash2 className="w-4 h-4" />
+                      </Button>
+                    </div>
+                    <div className="pl-7 mt-3">
+                      <Input
+                        value={link.url}
+                        onChange={(e) => updateLink(link.id, { url: e.target.value })}
+                        placeholder="https://..."
+                        className="bg-muted border-border text-sm mb-3"
+                      />
+                      <div className="grid grid-cols-2 gap-3">
+                        <Select value={link.icon} onValueChange={(val) => updateLink(link.id, { icon: val })}>
+                          <SelectTrigger className="bg-muted border-border text-sm h-10">
+                            <SelectValue placeholder="Icon" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {ICONS.map((icon) => (
+                              <SelectItem key={icon} value={icon}>{icon}</SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                        <Select value={link.animation || "none"} onValueChange={(val: any) => updateLink(link.id, { animation: val })}>
+                          <SelectTrigger className="bg-muted border-border text-sm h-10">
+                            <SelectValue placeholder="Animation" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="none">None</SelectItem>
+                            <SelectItem value="wobble">Wobble</SelectItem>
+                            <SelectItem value="bounce">Bounce</SelectItem>
+                            <SelectItem value="blink">Blink</SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
+                    </div>
+                  </Reorder.Item>
+                ))}
+              </Reorder.Group>
+            </div>
+          </div>
+
+          {/* RIGHT COLUMN: Live Preview */}
+          <div className="hidden lg:flex flex-col items-center justify-center border-l border-border bg-white sticky top-0 h-screen">
+            
+            {/* Top right URL copy bar */}
+            <div className="absolute top-4 right-4 z-10 flex items-center gap-2 bg-secondary/80 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm border border-border">
+              <span className="text-xs text-muted-foreground truncate max-w-[200px]">pagehub.com/{profile.slug}</span>
               <Button
-                onClick={() => setEditing(true)}
-                className="gap-2 px-6"
+                variant="ghost"
                 size="sm"
+                className="h-6 w-6 p-0 rounded-full"
+                onClick={handleCopy}
               >
-                <Settings className="w-4 h-4" />
-                Edit page
+                {copied ? <Check className="w-3.5 h-3.5 text-green-500" /> : <Copy className="w-3.5 h-3.5" />}
               </Button>
             </div>
-          </motion.div>
-        </main>
 
-        {/* Slide-in edit panel */}
-        <AnimatePresence>
-          {editing && (
-            <EditPanel
-              profile={profile}
-              onUpdateProfile={updateProfile}
-              onAddLink={addLink}
-              onUpdateLink={updateLink}
-              onRemoveLink={removeLink}
-              onReorderLinks={reorderLinks}
-              onClose={() => setEditing(false)}
-            />
-          )}
-        </AnimatePresence>
+            {/* Phone Mockup */}
+            <div className="w-[300px] h-[640px] rounded-[2.5rem] border-[8px] border-black overflow-hidden shadow-2xl relative flex flex-col transition-colors duration-300 mt-12"
+              style={{ backgroundColor: profile.theme?.backgroundColor || "hsl(var(--background))" }}
+            >
+              {/* Notch / Dynamic Island simulation */}
+              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-5 bg-black rounded-b-xl z-20"></div>
+
+              {/* Scrollable Screen Content */}
+              <div className="flex-1 overflow-y-auto overflow-x-hidden no-scrollbar pb-10">
+                <div className="px-4 pt-14 pb-8 flex flex-col items-center min-h-full">
+                  <ProfileHeader name={profile.name} bio={profile.bio} avatar={profile.avatar} />
+                  
+                  {/* Preview Social Icons */}
+                  {profile.socialLinks && profile.socialLinks.filter(l => l.enabled).length > 0 && (
+                    <div className="flex items-center justify-center flex-wrap gap-4 mt-4 mb-6">
+                      {profile.socialLinks.filter(l => l.enabled).map(link => {
+                        const IconComp = ICON_MAP[link.icon] || ExternalLink;
+                        return (
+                          <a key={link.id} href={link.url} target="_blank" rel="noreferrer" 
+                            className="text-foreground hover:opacity-70 transition-opacity"
+                            style={{ color: profile.theme?.buttonTextColor || "inherit" }}
+                          >
+                            <IconComp className="w-6 h-6" />
+                          </a>
+                        )
+                      })}
+                    </div>
+                  )}
+
+                  {/* Preview Links */}
+                  <div className="w-full space-y-3 mt-4">
+                    {profile.links.filter((l) => l.enabled).length === 0 ? (
+                      <p className="text-center text-muted-foreground/60 text-sm py-6">
+                        No links yet.
+                      </p>
+                    ) : (
+                      profile.links
+                        .filter((l) => l.enabled)
+                        .map((link, i) => (
+                          <LinkCard key={link.id} link={link} index={i} theme={profile.theme} />
+                        ))
+                    )}
+                  </div>
+                  
+                  <p className="text-center text-muted-foreground/40 text-xs mt-10">
+                    PageHub
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
       </SidebarInset>
     </SidebarProvider>
   );

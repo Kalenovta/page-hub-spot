@@ -7,6 +7,13 @@ export interface LinkItem {
   animation?: "none" | "wobble" | "bounce" | "blink";
 }
 
+export interface SocialLink {
+  id: string;
+  url: string;
+  icon: string;
+  enabled: boolean;
+}
+
 export interface ProfileTheme {
   backgroundColor?: string;
   buttonColor?: string;
@@ -18,6 +25,7 @@ export interface ProfileData {
   bio: string;
   avatar: string;
   links: LinkItem[];
+  socialLinks: SocialLink[];
   slug: string;
   theme?: ProfileTheme;
 }
@@ -41,4 +49,5 @@ export const DEFAULT_PROFILE: ProfileData = {
     { id: "3", title: "Twitter / X", url: "https://x.com", icon: "Twitter", enabled: true },
     { id: "4", title: "LinkedIn", url: "https://linkedin.com", icon: "Linkedin", enabled: true },
   ],
+  socialLinks: [],
 };
