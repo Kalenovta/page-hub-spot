@@ -5,9 +5,10 @@ interface ProfileHeaderProps {
   name: string;
   bio: string;
   avatar: string;
+  usernameColor?: string;
 }
 
-const ProfileHeader = ({ name, bio, avatar }: ProfileHeaderProps) => {
+const ProfileHeader = ({ name, bio, avatar, usernameColor }: ProfileHeaderProps) => {
   return (
     <motion.div
       className="flex flex-col items-center gap-4 mb-8"
@@ -23,7 +24,12 @@ const ProfileHeader = ({ name, bio, avatar }: ProfileHeaderProps) => {
         />
       </div>
       <div className="text-center">
-        <h1 className="text-2xl font-display font-bold glow-text">{name}</h1>
+        <h1
+          className="text-2xl font-display font-bold glow-text"
+          style={usernameColor ? { color: usernameColor } : undefined}
+        >
+          {name}
+        </h1>
         <p className="text-muted-foreground text-sm mt-1">{bio}</p>
       </div>
     </motion.div>

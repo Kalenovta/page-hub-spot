@@ -154,7 +154,7 @@ const DashboardPage = () => {
             {/* Appearance Section */}
             <div className="mb-8">
               <h2 className="text-xl font-display font-bold text-foreground mb-4">Appearance</h2>
-              <div className="bg-white rounded-2xl p-6 shadow-sm border border-border grid grid-cols-3 gap-4">
+              <div className="bg-white rounded-2xl p-6 shadow-sm border border-border grid grid-cols-2 sm:grid-cols-4 gap-4">
                 <div>
                   <label className="text-xs text-muted-foreground mb-1 block">Background</label>
                   <div className="flex items-center gap-2 bg-muted border border-border rounded-md p-1">
@@ -180,7 +180,7 @@ const DashboardPage = () => {
                   </div>
                 </div>
                 <div>
-                  <label className="text-xs text-muted-foreground mb-1 block">Text</label>
+                  <label className="text-xs text-muted-foreground mb-1 block">Link Text</label>
                   <div className="flex items-center gap-2 bg-muted border border-border rounded-md p-1">
                     <Input
                       type="color"
@@ -189,6 +189,18 @@ const DashboardPage = () => {
                       className="w-8 h-8 p-0 border-0 rounded overflow-hidden cursor-pointer shrink-0"
                     />
                     <span className="text-xs text-muted-foreground uppercase font-mono hidden sm:inline">{profile.theme?.buttonTextColor || "#000000"}</span>
+                  </div>
+                </div>
+                <div>
+                  <label className="text-xs text-muted-foreground mb-1 block">Username</label>
+                  <div className="flex items-center gap-2 bg-muted border border-border rounded-md p-1">
+                    <Input
+                      type="color"
+                      value={profile.theme?.usernameColor || "#ffffff"}
+                      onChange={(e) => updateProfile({ theme: { ...profile.theme, usernameColor: e.target.value } })}
+                      className="w-8 h-8 p-0 border-0 rounded overflow-hidden cursor-pointer shrink-0"
+                    />
+                    <span className="text-xs text-muted-foreground uppercase font-mono hidden sm:inline">{profile.theme?.usernameColor || "#ffffff"}</span>
                   </div>
                 </div>
               </div>
@@ -336,7 +348,7 @@ const DashboardPage = () => {
               {/* Scrollable Screen Content */}
               <div className="flex-1 overflow-y-auto overflow-x-hidden no-scrollbar pb-10">
                 <div className="px-4 pt-14 pb-8 flex flex-col items-center min-h-full">
-                  <ProfileHeader name={profile.name} bio={profile.bio} avatar={profile.avatar} />
+                  <ProfileHeader name={profile.name} bio={profile.bio} avatar={profile.avatar} usernameColor={profile.theme?.usernameColor} />
                   
                   {/* Preview Social Icons */}
                   {profile.socialLinks && profile.socialLinks.filter(l => l.enabled).length > 0 && (

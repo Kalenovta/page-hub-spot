@@ -72,7 +72,7 @@ const UserProfilePage = () => {
       </div>
 
       <div className="relative w-full max-w-md">
-        <ProfileHeader name={profile.name} bio={profile.bio} avatar={profile.avatar} />
+        <ProfileHeader name={profile.name} bio={profile.bio} avatar={profile.avatar} usernameColor={profile.theme?.usernameColor} />
 
         {/* Social Icons */}
         {profile.socialLinks && profile.socialLinks.filter(l => l.enabled).length > 0 && (
