@@ -18,6 +18,7 @@ export interface ProfileTheme {
   backgroundColor?: string;
   buttonColor?: string;
   buttonTextColor?: string;
+  usernameColor?: string;
 }
 
 export interface ProfileData {
