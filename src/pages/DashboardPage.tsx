@@ -17,6 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import ProfileHeader from "@/components/ProfileHeader";
 import LinkCard from "@/components/LinkCard";
 import { useAuth } from "@/contexts/AuthContext";
+import { useFancyToast } from "@/components/ui/fancy-toast";
 import { useUserProfile } from "@/hooks/useUserProfile";
 import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
 import { AdminSidebar } from "@/components/AdminSidebar";
@@ -29,6 +30,7 @@ const ICON_MAP: Record<string, React.ElementType> = {
 const DashboardPage = () => {
   const { currentUser } = useAuth();
   const { profile, updateProfile, addLink, updateLink, removeLink } = useUserProfile();
+  const { showToast } = useFancyToast();
 
   const [copied, setCopied] = useState(false);
 
@@ -50,6 +52,11 @@ const DashboardPage = () => {
       enabled: true,
     };
     updateProfile({ socialLinks: [...(profile.socialLinks || []), newSocial] });
+    showToast({
+      type: "success",
+      title: "Social icon ditambahkan!",
+      description: "Social icon baru berhasil ditambahkan ke profil kamu.",
+    });
   };
 
   const updateSocialLink = (id: string, updates: any) => {
@@ -254,7 +261,19 @@ const DashboardPage = () => {
             <div className="mb-20">
               <div className="flex items-center justify-between mb-4">
                 <h2 className="text-xl font-display font-bold text-foreground">Links</h2>
-                <Button variant="default" size="sm" onClick={addLink} className="gap-1 rounded-full px-4 font-semibold">
+                <Button
+                  variant="default"
+                  size="sm"
+                  className="gap-1 rounded-full px-4 font-semibold"
+                  onClick={() => {
+                    addLink();
+                    showToast({
+                      type: "success",
+                      title: "Link berhasil ditambahkan!",
+                      description: "Link baru sudah muncul di halaman profil kamu.",
+                    });
+                  }}
+                >
                   <Plus className="w-4 h-4" /> Add Link
                 </Button>
               </div>
