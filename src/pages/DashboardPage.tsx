@@ -8,7 +8,8 @@ import {
   Plus,
   Trash2,
   GripVertical,
-  Globe, Github, Twitter, Linkedin, Link as LinkIcon, Youtube, Instagram, Mail
+  Globe, Github, Twitter, Linkedin, Link as LinkIcon, Youtube, Instagram, Mail,
+  Settings, LogOut
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -19,7 +20,7 @@ import LinkCard from "@/components/LinkCard";
 import { useAuth } from "@/contexts/AuthContext";
 import { useFancyToast } from "@/components/ui/fancy-toast";
 import { useUserProfile } from "@/hooks/useUserProfile";
-import { SidebarProvider, SidebarInset, SidebarTrigger } from "@/components/ui/sidebar";
+import { SidebarProvider, SidebarInset } from "@/components/ui/sidebar";
 import { AdminSidebar } from "@/components/AdminSidebar";
 
 const ICONS = ["Globe", "Github", "Twitter", "Linkedin", "Link", "Youtube", "Instagram", "Mail"];
@@ -28,11 +29,12 @@ const ICON_MAP: Record<string, React.ElementType> = {
 };
 
 const DashboardPage = () => {
-  const { currentUser } = useAuth();
+  const { currentUser, logout } = useAuth();
   const { profile, updateProfile, addLink, updateLink, removeLink } = useUserProfile();
   const { showToast } = useFancyToast();
 
   const [copied, setCopied] = useState(false);
+  const [mobileTab, setMobileTab] = useState<"edit" | "preview">("edit");
 
   if (!currentUser) return null;
 
@@ -73,21 +75,18 @@ const DashboardPage = () => {
 
   return (
     <SidebarProvider>
-      <AdminSidebar pageUrl={pageUrl} />
+      <AdminSidebar onEditClick={() => {}} pageUrl={pageUrl} />
       
-      <SidebarInset className="min-h-screen bg-[#F3F3F1] flex flex-col">
-        {/* Top bar for mobile trigger */}
-        <div className="lg:hidden p-4 border-b border-border bg-white flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <SidebarTrigger className="-ml-2" />
-            <span className="text-base font-bold font-display text-foreground">PageHub</span>
-          </div>
+      <SidebarInset className="min-h-screen bg-[#F3F3F1] flex flex-col pb-16 lg:pb-0">
+        {/* Top bar for mobile */}
+        <div className={`lg:hidden p-4 border-b border-border bg-white items-center justify-center ${mobileTab === 'preview' ? 'hidden' : 'flex'}`}>
+          <span className="text-base font-bold font-display text-foreground">PageHub</span>
         </div>
 
         <div className="flex-1 grid grid-cols-1 lg:grid-cols-[1fr_400px] items-start">
           
           {/* LEFT COLUMN: Editor Panel */}
-          <div className="p-4 sm:p-8 max-w-3xl mx-auto w-full">
+          <div className={`p-4 sm:p-8 max-w-3xl mx-auto w-full ${mobileTab === 'preview' ? 'hidden lg:block' : 'block'}`}>
             <div className="mb-8">
               <h2 className="text-2xl font-display font-bold text-foreground">Profile</h2>
               <p className="text-muted-foreground text-sm">Update your public profile details.</p>
@@ -342,7 +341,7 @@ const DashboardPage = () => {
           </div>
 
           {/* RIGHT COLUMN: Live Preview */}
-          <div className="hidden lg:flex flex-col items-center justify-center border-l border-border bg-white sticky top-0 h-screen">
+          <div className={`flex-col items-center justify-center border-l border-border bg-white sticky top-0 h-screen ${mobileTab === 'edit' ? 'hidden lg:flex' : 'flex'}`}>
             
             {/* Top right URL copy bar */}
             <div className="absolute top-4 right-4 z-10 flex items-center gap-2 bg-secondary/80 backdrop-blur-md px-3 py-1.5 rounded-full shadow-sm border border-border">
@@ -358,15 +357,15 @@ const DashboardPage = () => {
             </div>
 
             {/* Phone Mockup */}
-            <div className="w-[300px] h-[640px] rounded-[2.5rem] border-[8px] border-black overflow-hidden shadow-2xl relative flex flex-col transition-colors duration-300 mt-12"
+            <div className="w-full lg:w-[300px] h-full lg:h-[640px] lg:rounded-[2.5rem] lg:border-[8px] lg:border-black overflow-hidden lg:shadow-2xl relative flex flex-col transition-colors duration-300 lg:mt-12"
               style={{ backgroundColor: profile.theme?.backgroundColor || "hsl(var(--background))" }}
             >
               {/* Notch / Dynamic Island simulation */}
-              <div className="absolute top-0 left-1/2 -translate-x-1/2 w-28 h-5 bg-black rounded-b-xl z-20"></div>
+              <div className="hidden lg:block absolute top-0 left-1/2 -translate-x-1/2 w-28 h-5 bg-black rounded-b-xl z-20"></div>
 
               {/* Scrollable Screen Content */}
-              <div className="flex-1 overflow-y-auto overflow-x-hidden no-scrollbar pb-10">
-                <div className="px-4 pt-14 pb-8 flex flex-col items-center min-h-full">
+              <div className="flex-1 overflow-y-auto overflow-x-hidden no-scrollbar pb-20 lg:pb-10 pt-8 lg:pt-0">
+                <div className="px-4 lg:pt-14 pb-8 flex flex-col items-center min-h-full">
                   <ProfileHeader name={profile.name} bio={profile.bio} avatar={profile.avatar} usernameColor={profile.theme?.usernameColor} />
                   
                   {/* Preview Social Icons */}
@@ -408,6 +407,36 @@ const DashboardPage = () => {
               </div>
             </div>
           </div>
+        </div>
+
+        {/* Mobile Bottom Navigation */}
+        <div className="lg:hidden fixed bottom-0 left-0 right-0 z-50 bg-white border-t border-border flex items-center justify-around p-2 pb-safe shadow-[0_-2px_10px_rgba(0,0,0,0.05)]">
+          <Button 
+            variant="ghost" 
+            onClick={() => setMobileTab("edit")}
+            className={`flex flex-col items-center gap-1 h-auto py-2 px-4 ${mobileTab === 'edit' ? 'text-primary hover:text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+          >
+            <Settings className="w-5 h-5" />
+            <span className="text-[10px] font-medium">Edit</span>
+          </Button>
+
+          <Button 
+            variant="ghost" 
+            onClick={() => setMobileTab("preview")}
+            className={`flex flex-col items-center gap-1 h-auto py-2 px-4 ${mobileTab === 'preview' ? 'text-primary hover:text-primary' : 'text-muted-foreground hover:text-foreground'}`}
+          >
+            <ExternalLink className="w-5 h-5" />
+            <span className="text-[10px] font-medium">View</span>
+          </Button>
+
+          <Button 
+            variant="ghost" 
+            onClick={logout}
+            className="flex flex-col items-center gap-1 h-auto py-2 px-4 text-muted-foreground hover:text-destructive"
+          >
+            <LogOut className="w-5 h-5" />
+            <span className="text-[10px] font-medium">Logout</span>
+          </Button>
         </div>
       </SidebarInset>
     </SidebarProvider>
